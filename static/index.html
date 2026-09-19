@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VideoGrab — Descarga videos de cualquier sitio</title>
+    <meta
+      name="description"
+      content="Pega la dirección de un video público y descárgalo en la calidad que quieras, o extrae solo el audio en MP3."
+    />
+    <meta property="og:title" content="VideoGrab" />
+    <meta property="og:description" content="Descarga videos públicos en la calidad que quieras." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0e13'/%3E%3Cpath d='M16 7v13m0 0-5-5m5 5 5-5M8 25h16' stroke='%2358e1b0' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=jetbrains-mono@400,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="dropzone" id="dropzone" hidden aria-hidden="true">
+      <div class="dropzone-card">
+        <svg viewBox="0 0 32 32" width="40" height="40" fill="none" aria-hidden="true">
+          <path
+            d="M16 6v14m0 0-5.5-5.5M16 20l5.5-5.5M6 24v2h20v-2"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <p class="dropzone-title">Suelta el enlace</p>
+        <p class="dropzone-sub">Lo analizamos en cuanto lo dejes caer</p>
+      </div>
+    </div>
+    <div class="glow" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="VideoGrab, inicio">
+        <svg viewBox="0 0 32 32" width="30" height="30" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="30" height="30" rx="9" stroke="currentColor" stroke-width="1.6" opacity=".35" />
+          <path
+            d="M16 8v12m0 0-4.5-4.5M16 20l4.5-4.5M9.5 24.5h13"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span>VideoGrab</span>
+      </a>
+      <span class="status" id="health">comprobando motor…</span>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Descargador universal</p>
+        <h1>Pega un enlace.<br /><em>Quédate con el video.</em></h1>
+        <p class="lede">
+          Funciona con más de mil sitios: YouTube, Vimeo, TikTok, X, Facebook, Reddit, Twitch,
+          Dailymotion y cualquier página con video abierto. Elige resolución o extrae solo el audio.
+        </p>
+
+        <form class="searchbar" id="form" autocomplete="off">
+          <svg class="link-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
+            <path
+              d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10.7 5.24M14 11a5 5 0 0 0-7.07 0l-2.12 2.12a5 5 0 0 0 7.07 7.07l1.4-1.4"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+            />
+          </svg>
+          <input
+            id="url"
+            type="text"
+            inputmode="url"
+            placeholder="https://…"
+            aria-label="Dirección del video"
+            data-testid="input-url"
+          />
+          <button type="submit" id="analyze" data-testid="button-analyze">
+            <span class="label">Analizar</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+        <p class="hint" id="hint">
+          Consejo: arrastra el enlace hasta aquí o pégalo; también sirve la dirección de una
+          publicación y se detectará el video dentro.
+        </p>
+      </section>
+
+      <section id="error" class="alert" hidden data-testid="text-error"></section>
+
+      <!-- Skeleton -->
+      <section id="skeleton" class="card result" hidden aria-hidden="true">
+        <div class="sk sk-thumb"></div>
+        <div class="sk-body">
+          <div class="sk sk-line w70"></div>
+          <div class="sk sk-line w40"></div>
+          <div class="sk sk-chips">
+            <div class="sk sk-chip"></div>
+            <div class="sk sk-chip"></div>
+            <div class="sk sk-chip"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resultado -->
+      <section id="result" class="card result" hidden>
+        <div class="thumb-wrap">
+          <img id="thumb" alt="" />
+          <span class="badge" id="duration"></span>
+        </div>
+        <div class="meta">
+          <h2 id="title" data-testid="text-title"></h2>
+          <p class="sub"><span id="uploader"></span><span class="dot">·</span><span id="site"></span></p>
+          <p class="offer" id="offer" hidden>
+            Este enlace pertenece a una lista.
+            <button type="button" class="link-btn" id="offer-btn" data-testid="button-open-playlist">
+              Abrir la lista completa
+            </button>
+          </p>
+
+          <div class="tabs" role="tablist">
+            <button class="tab is-on" id="tab-video" role="tab" data-testid="button-tab-video">Video</button>
+            <button class="tab" id="tab-audio" role="tab" data-testid="button-tab-audio">Solo audio</button>
+          </div>
+
+          <div id="pane-video">
+            <p class="pane-label">Resolución disponible</p>
+            <div class="chips" id="qualities"></div>
+          </div>
+          <div id="pane-audio" hidden>
+            <p class="pane-label">Se extrae la mejor pista y se convierte a MP3 a 192 kbps.</p>
+          </div>
+
+          <div class="subs" id="subs-block" hidden>
+            <p class="pane-label">Subtítulos <span class="muted-note" id="subs-hint"></span></p>
+            <div class="chips" id="subs-langs"></div>
+            <label class="auto-row" id="subs-auto-row" hidden>
+              <span>Añadir automáticos</span>
+              <select id="subs-auto" class="select" data-testid="select-auto-subs"></select>
+            </label>
+            <div class="tabs sm" id="subs-mode" hidden>
+              <button type="button" class="tab is-on" data-sm="file" data-testid="button-subs-file">
+                Archivo .srt aparte
+              </button>
+              <button type="button" class="tab" data-sm="embed" data-testid="button-subs-embed">
+                Incrustados en el video
+              </button>
+            </div>
+          </div>
+
+          <button class="primary" id="start" data-testid="button-download">Descargar</button>
+        </div>
+      </section>
+
+      <!-- Lista de reproducción -->
+      <section id="playlist" class="card pl" hidden>
+        <header class="pl-head">
+          <div class="pl-id">
+            <p class="kicker">Lista de reproducción</p>
+            <h2 id="pl-title" data-testid="text-playlist-title"></h2>
+            <p class="sub">
+              <span id="pl-uploader"></span><span class="dot">·</span><span id="pl-count"></span>
+            </p>
+          </div>
+          <button type="button" class="ghost" id="pl-toggle" data-testid="button-toggle-all">
+            Quitar todos
+          </button>
+        </header>
+
+        <p class="pl-cap" id="pl-cap" hidden></p>
+        <ul class="pl-items" id="pl-items"></ul>
+
+        <div class="pl-foot">
+          <div class="tabs" role="tablist">
+            <button class="tab is-on" id="pl-tab-video" role="tab" data-testid="button-pl-video">
+              Video
+            </button>
+            <button class="tab" id="pl-tab-audio" role="tab" data-testid="button-pl-audio">
+              Solo audio
+            </button>
+          </div>
+          <div id="pl-pane-video">
+            <p class="pane-label">Calidad máxima por video</p>
+            <div class="chips" id="pl-qualities"></div>
+          </div>
+          <p class="pane-label" id="pl-pane-audio" hidden>
+            Cada video se convierte a MP3 a 192 kbps.
+          </p>
+
+          <div class="subs" id="pl-subs">
+            <p class="pane-label">
+              Subtítulos <span class="muted-note">se toman de cada video si existen</span>
+            </p>
+            <div class="chips" id="pl-subs-langs"></div>
+            <label class="auto-row" id="pl-subs-extra" hidden>
+              <input type="checkbox" id="pl-subs-auto" data-testid="checkbox-pl-auto" />
+              <span>Aceptar subtítulos automáticos si no hay manuales</span>
+            </label>
+            <div class="tabs sm" id="pl-subs-mode" hidden>
+              <button type="button" class="tab is-on" data-sm="file" data-testid="button-pl-subs-file">
+                Archivos .srt aparte
+              </button>
+              <button type="button" class="tab" data-sm="embed" data-testid="button-pl-subs-embed">
+                Incrustados en el video
+              </button>
+            </div>
+          </div>
+          <button class="primary" id="pl-start" data-testid="button-download-playlist"></button>
+          <p class="hint">Los videos se descargan uno por uno y al final se entregan en un ZIP.</p>
+        </div>
+      </section>
+
+      <!-- Cola -->
+      <section id="queue-wrap" hidden>
+        <h3 class="section-title">Descargas</h3>
+        <ul class="queue" id="queue"></ul>
+      </section>
+
+      <section class="notice">
+        <strong>Uso responsable.</strong> Descarga únicamente contenido público, propio o con permiso
+        de su autor. La app no elude protecciones DRM ni accede a contenido privado o de pago.
+      </section>
+    </main>
+
+    <footer>VideoGrab · Flask + yt-dlp · construido para uso personal</footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
