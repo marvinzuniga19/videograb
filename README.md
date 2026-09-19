@@ -1,8 +1,12 @@
-# VideoGrab — uso en tu laptop
+# VideoGrab
 
-La app tiene dos partes: la interfaz (lo que ves) y el motor que descarga (Python + yt-dlp).
-Para usarla en tu laptop hay que ejecutar el motor ahí, porque es el que baja los archivos
-y los guarda en tu disco.
+Descargador de videos que funciona con **más de mil sitios** (YouTube, Vimeo, TikTok,
+X, Facebook, Reddit, Twitch, Dailymotion y cualquier página con video abierto).
+
+La app tiene dos partes: una **interfaz web** (lo que ves) y un **motor de descarga**
+hecho en Python con `yt-dlp`. Todo corre en tu propio equipo: el motor baja los archivos
+directamente del sitio de origen y los guarda en tu disco. No hay cuentas, ni servidores
+intermedios, ni dirección que salga de tu red.
 
 ---
 
@@ -13,8 +17,8 @@ y los guarda en tu disco.
 | **Python 3.9 o superior** | ejecuta el motor | [python.org/downloads](https://www.python.org/downloads/) — en Windows marca la casilla **Add Python to PATH** |
 | **ffmpeg** | unir video+audio en alta calidad, convertir a MP3, incrustar subtítulos | Windows: `winget install Gyan.FFmpeg` · macOS: `brew install ffmpeg` · Ubuntu: `sudo apt install ffmpeg` |
 
-Sin ffmpeg la app arranca igual, pero se limita a la calidad ya combinada (normalmente 720p)
-y no puede generar MP3 ni incrustar subtítulos.
+Sin ffmpeg la app arranca igual, pero se limita a la calidad ya combinada (normalmente
+720p) y no puede generar MP3 ni incrustar subtítulos.
 
 ---
 
@@ -40,9 +44,15 @@ pip install -r requirements.txt
 python server.py
 ```
 
+El puerto por omisión es el 8000. Si está ocupado, usa la variable `PORT`:
+
+```bash
+PORT=8100 python server.py        # en Windows: set PORT=8100 y luego python server.py
+```
+
 ---
 
-## 2b. Versión de escritorio (ventana propia, sin navegador)
+## 3. Versión de escritorio (ventana propia, sin navegador)
 
 Si prefieres una app con su propia ventana, menús nativos y diálogo de guardado del
 sistema, usa el modo escritorio. Es el mismo motor: solo cambia la envoltura.
@@ -86,7 +96,9 @@ o copias `ffmpeg.exe` junto al ejecutable.
 
 ---
 
-## 2c. Recuerda el tamaño y la posición
+## 4. Trucos y detalles de la versión de escritorio
+
+### Recuerda el tamaño y la posición
 
 La ventana vuelve a abrirse donde y como la dejaste: mismo tamaño, misma posición, y
 maximizada si así la cerraste. También conserva por separado el tamaño normal, para que al
@@ -103,9 +115,7 @@ Dos casos que están resueltos:
 Si quieres volver al punto de partida, usa **Ver → Restablecer el tamaño de la ventana**:
 la centra con su tamaño original y olvida lo guardado.
 
----
-
-## 2d. Icono en la bandeja del sistema
+### Icono en la bandeja del sistema
 
 La versión de escritorio deja un icono junto al reloj. Un clic muestra u oculta la ventana,
 y con el botón derecho aparece un menú con: mostrar u ocultar la ventana, abrir la carpeta
@@ -125,9 +135,7 @@ ya lo ves en la barra de estado.
 En escritorios de Linux sin bandeja (algunas versiones de GNOME sin extensiones), la app
 funciona igual y la opción aparece desactivada: la ventana se cierra de forma normal.
 
----
-
-## 2e. Arrastrar y soltar enlaces
+### Arrastrar y soltar enlaces
 
 No hace falta copiar y pegar. Arrastra el enlace hasta la ventana y suéltalo: aparece un
 aviso y el análisis arranca solo. Funciona igual en el navegador y en la versión de
@@ -143,7 +151,7 @@ abren en tu navegador de siempre.
 
 ---
 
-## 3. Dónde quedan los archivos
+## 5. Dónde quedan los archivos
 
 Cada descarga se guarda en la subcarpeta `downloads/` dentro de la carpeta de la app,
 en un directorio propio por descarga. El botón **Guardar** del navegador también te deja
@@ -153,7 +161,7 @@ Puedes borrar `downloads/` cuando quieras para liberar espacio.
 
 ---
 
-## 4. Mantenimiento
+## 6. Mantenimiento
 
 Los sitios web cambian a menudo y yt-dlp se actualiza para seguirles el paso. Si algún
 sitio deja de funcionar, actualiza el motor:
@@ -166,7 +174,7 @@ pip install -U yt-dlp
 
 ---
 
-## 5. Problemas frecuentes
+## 7. Problemas frecuentes
 
 | Síntoma | Causa y solución |
 | --- | --- |
@@ -174,11 +182,11 @@ pip install -U yt-dlp
 | La página no carga en `localhost:8000` | El puerto está ocupado. Arranca con otro: `PORT=8100 python server.py` (Windows: `set PORT=8100` y luego `python server.py`). |
 | Falla al elegir 1080p o más | Falta ffmpeg. Instálalo y reinicia la app. |
 | "Este video requiere iniciar sesión" | Es contenido privado o restringido; la app solo trabaja con material público, propio o con permiso. |
-| Un sitio que antes funcionaba ya no | Actualiza yt-dlp (sección 4). |
+| Un sitio que antes funcionaba ya no | Actualiza yt-dlp (sección 6). |
 
 ---
 
-## 6. Detalle técnico
+## 8. Detalle técnico
 
 - `server.py` — motor Flask sobre yt-dlp. Sirve también la interfaz, así que todo va por un
   solo puerto (8000 por omisión, configurable con la variable `PORT`).
